@@ -97,36 +97,45 @@ class User:
         )
 
 
-    def process(self):
-            with sqlite3.connect(self.DB_PATH) as conn:
-                self._create_table(conn)
+    def add_account(self):
+        with sqlite3.connect(self.DB_PATH) as conn:
+            self._create_table(conn)
 
-                if self._check_for_existing_account(conn):
-                    print("The account already exists")
-                    return False
+            if self._check_for_existing_account(conn):
+                print("The account already exists")
+                return False
 
-                try:
-                    self._add_to_db(conn)
-                except sqlite3.IntegrityError as error:
-                    print(f"Account creation failed: {error}")
-                    return False
+            try:
+                self._add_to_db(conn)
+            except sqlite3.IntegrityError as error:
+                print(f"Account creation failed: {error}")
+                return False
 
-                print("Account created successfully")
-                return True
+            print("Account created successfully")
+            return True
 
-    def update_information(self, account_number= None, gov_identification=None):
-            pass
+
+    # def update_information(self, account_number= None, gov_identification=None):
+    #     with sqlite3.connect(self.DB_PATH) as conn:
+    #         if account_number is not None:
+    #             result = self._check_for_existing_account(conn , account_number)
+    #         elif gov_identification:
+    #             result = self._check_for_existing_account(conn , gov_identification)
+    #         else:
+    #             return "None"
+
+                 
 
 
 
 
 user = User(
-    "2312120968",
+    "3422120968",
     "khaled",
     "alquatibi",
     "test@test.com",
-    "0559182878",
-    "your_password",
+    "03432382878",
+    "khlk4004",
     1000
 )
-user.process()
+user.add_account()
