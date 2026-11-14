@@ -11,7 +11,6 @@ vailed password
 """
 
 
-
 class User:
     def __init__(self, gov_identification, first_name, last_name, email, phone_number, password, balance=0):
         self.user_id = str(uuid.uuid7())
@@ -30,7 +29,7 @@ class User:
 
 
 class UserService:
-    DB_PATH = "/home/kind/Desktop/Digital_Wallet/src/database/wallet.db"
+    DB_PATH = "src/backend/database/wallet.db"
     def __init__(self, user):
         self.user = user
 
@@ -71,13 +70,13 @@ class UserService:
                             self.user.created_at
                         )
                             )
-            return "Done"
+            return f"Done adding {self.user.gov_identification}"
           
         except BufferError:
             return f'error {BufferError}'
 
     def check_for_existing_account(self):
-            with sqlite3.connect("/home/kind/Desktop/Digital_Wallet/src/database/wallet.db") as conn:
+            with sqlite3.connect(self.DB_PATH) as conn:
                 result = conn.execute(
                     """
                     SELECT 1
@@ -93,17 +92,17 @@ class UserService:
     def add_account(self):
 
         if self.check_for_existing_account():
-            print("you have already account")
+            return "you have already account"
         
         elif not UserValidator().validate_email(self.user.email):
-            print("invild email")
+            return "invild email" 
 
         elif not UserValidator().validate_phone_number(self.user.phone_number):
-            print('invild phone')
+            return 'invild phone'
         else:
-            self.save_to_db()
+            save_to_db = self.save_to_db()
+            return save_to_db
 
-        
 
     def delete_account(self):
         pass
