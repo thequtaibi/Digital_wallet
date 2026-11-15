@@ -2,7 +2,7 @@ import uuid
 import time
 import sqlite3
 
-class transferInfo:
+class TransferInfo:
     def __init__(self, from_account_id, to_account_id, amount):
         self.from_account_id = from_account_id
         self.to_account_id = to_account_id
@@ -22,20 +22,32 @@ class TransferService:
         self.idempotency_key = str(uuid.uuid7())
 
 
-    def vaild_users(self, account_id):
-        # check if the account exist return Ture
-        with sqlite3.connect("src/backend/database/wallet.db") as conn:
-            result = conn.execute("SELECT user_id FROM users WHERE user_id = ?" , (account_id,))
-        return result.fetchone() is not None
 
+
+
+
+    def valid_users(self, account_id):
+        with sqlite3.connect("src/backend/database/wallet.db") as conn:
+            result = conn.execute(
+                "SELECT 1 FROM users WHERE user_id = ? LIMIT 1",
+                (account_id,)
+            )
+
+            return result.fetchone() is not None
 
     def transfer_process(self):
-        # return True if the sender have enough monany
+
         if self.amount <= 0:
             raise ValueError("Amount must be positive")
 
+        if self.from_account_id == self.to_account_id:
+            raise ValueError("Cannot transfer to the same account")
+
         with sqlite3.connect("src/backend/database/wallet.db") as conn:
-            result = conn.execute(
+
+            conn.execute("BEGIN IMMEDIATE")
+
+            sender = conn.execute(
                 """
                 UPDATE users
                 SET balance = balance - ?
@@ -48,7 +60,27 @@ class TransferService:
                 )
             )
 
-            return result.rowcount == 1
+            if sender.rowcount != 1:
+                raise ValueError(
+                    "Insufficient balance or sender not found"
+                )
+
+            receiver = conn.execute(
+                """
+                UPDATE users
+                SET balance = balance + ?
+                WHERE user_id = ?
+                """,
+                (
+                    self.amount,
+                    self.to_account_id
+                )
+            )
+
+            if receiver.rowcount != 1:
+                raise ValueError("Receiver not found")
+
+        return True
 
     def recorded_transactions(self):
         # after process done creater record on the database
@@ -81,27 +113,32 @@ class TransferService:
 
 
 
-    def vaildations(self):
+    def transfer(self):
         self.status = "pending"
-        if self.vaild_users(self.from_account_id) and self.vaild_users(self.to_account_id):
+        if (
+            self.valid_users(self.from_account_id) and self.valid_users(self.to_account_id)
+        ):
             if self.transfer_process():
                self.status = "completed"
                self.recorded_transactions()
-               return "working"
+               return True
             else:
                 self.status = "failed"
                 self.recorded_transactions()
-                return "not working from transfer_process"
+                return False
             
         else:
             self.status = "failed"
             self.recorded_transactions()
-            return "not working from vaild_users"
+            return False
+
+    def print_report(self):
+        pass
 
 
-tranfor = transferInfo("01a1cfac-cd84-7381-a899-cffb2cc7be84", "01a1d3f3-249d-7033-bd9a-e79b2d738a5d", 500000)
-process = TransferService(tranfor).vaildations()
-print(process)
+test_user = TransferInfo("01a1cfac-cd84-7381-a899-cffb2cc7be84", "01a1d3b5-7765-7505-a358-b41c045e7d18", 500)
+answer = TransferService(test_user).transfer()
+print(answer)
 
 class TransactionRepository:
     # create reocted for the Transaction
