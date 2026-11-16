@@ -1,6 +1,6 @@
 from flask import Flask, request, jsonify
 app = Flask(__name__)
-from src.backend.services.transactions.transfer import TransferInfo, TransferService
+from backend.services.transactions.transfer.transfer import TransferInfo, TransferService
 
 
 def view_transaction_history():
