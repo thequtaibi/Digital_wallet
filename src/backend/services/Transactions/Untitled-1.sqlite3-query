@@ -1,0 +1,15 @@
+-- database: ../../database/wallet.db
+
+SELECT 
+u.account_number,
+CONCAT(u.first_name, ' ', u.last_name) AS name,
+(SELECT CONCAT(first_name, ' ', last_name) FROM users WHERE user_id = t.to_account_id) AS "to_account_name",
+(SELECT account_number FROM users WHERE user_id = t.to_account_id) AS "to_account_num",
+t.amount,
+t.status,
+t.transaction_type,
+t.created_at,
+t.note
+FROM users AS u
+LEFT JOIN transactions AS t
+ON u.user_id = t.from_account_id
