@@ -70,6 +70,3 @@ class Deposit:
             self.status = "failed"
             recorded_transactions.recorded(self.status)
             return {"message":" You don't have account"}
-
-
-
