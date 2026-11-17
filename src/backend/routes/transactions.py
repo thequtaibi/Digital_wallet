@@ -2,11 +2,23 @@ from flask import Flask, request, jsonify
 from src.backend.services.Transactions.transfer.transfer import TransferService
 # from src.backend.services.Transactions.depositing.depositing import Deposit
 from src.backend.services.Transactions.transfer_info import TransferInfo
+from src.backend.services.Transactions.transations_report import TransationsReport
 app = Flask(__name__)
 
 
-def view_transaction_history():
-    pass
+
+@app.route("/transactions/report", methods=['POST'])
+def transactions_report():
+    data = request.get_json()
+
+    transations_report = TransationsReport(user_id=data['user_id'])
+    transactions = transations_report._import_date_from_db()
+
+    return jsonify({
+        "status": "success",
+        "count": len(transactions),
+        "transactions": transactions
+    }), 200
 
 
 
