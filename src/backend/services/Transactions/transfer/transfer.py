@@ -1,8 +1,10 @@
 import uuid
 import time
 import sqlite3
-from services.Transactions.recorded_transactions import RecordedTransactions
-from services.Transactions.transfer_info import TransferInfo
+from src.backend.services.Transactions.recorded_transactions import RecordedTransactions
+from src.backend.services.Transactions.transfer_info import TransferInfo
+from datetime import datetime
+
 
 class TransferService:
     def __init__(self, transactionInfo):
@@ -73,6 +75,21 @@ class TransferService:
 
         return True
 
+    def validate_transfer(self):
+        if self.debtor == self.creditor:
+            return "Cannot transfer to the same account."
+
+        if not self.valid_users(self.debtor):
+            return "Sender account not found."
+
+        if not self.valid_users(self.creditor):
+            return "Recipient account not found."
+
+        if self.amount < 1:
+            return "Invalid transfer amount."
+
+        return None
+
     def transfer(self):
         recorded_transactions = RecordedTransactions(
             self.transaction_id,
@@ -84,28 +101,36 @@ class TransferService:
             self.idempotency_key
         )
 
-        
-        if (
-            self.valid_users(self.debtor) and self.valid_users(self.creditor)
-        ):
-            if self.transfer_process():
-               self.status = "completed"
-               recorded_transactions.recorded(self.status)
-               return True
-            else:
-                self.status = "failed"
-                recorded_transactions.recorded(self.status)
-                return False
-            
-        else:
+        message = self.validate_transfer()
+
+        if message is not None:
             self.status = "failed"
-            recorded_transactions.recorded(self.status)
-            return False
+            recorded_transactions.recorded(status=self.status, note=message)
+            return message
 
-    def print_report(self):
-        pass
+        if self.transfer_process():
+            self.status = "completed"
+            recorded_transactions.recorded(status=self.status, note="Transfer completed successfully.")
+            return f"{"Transfer completed successfully."}"
+
+        self.status = "failed"
+        return "Transfer failed"
 
 
-test_user = TransferInfo("01a1cfac-cd84-7381-a899-cffb2cc7be84", "01a1d3b5-7765-7505-a358-b41c045e7d18", 10, "transfer")
-answer = TransferService(test_user).transfer()
-print(answer)
+        
+    def print_report(self, note):
+        report = {
+            "report_name" : "Transfer Receipt",
+            "date" : datetime.fromtimestamp(self.created_at),
+            "transaction_id" : self.transaction_id,
+            "amount" : self.amount,
+            "from": self.debtor,
+            "to": self.creditor,
+            "status": self.status,
+            "note": note
+        }
+
+        return report
+        
+
+

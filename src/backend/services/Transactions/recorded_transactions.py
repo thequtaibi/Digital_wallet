@@ -9,9 +9,12 @@ class RecordedTransactions:
          self.amount = amount
          self.created_at = created_at
          self.idempotency_key = idempotency_key
+         self.note = None
 
 
-    def recorded(self, status):
+
+    def recorded(self, status, note):
+            self.note = note
             with sqlite3.connect("/home/kind/Desktop/Digital_Wallet/src/backend/database/wallet.db") as conn:
                 result = conn.execute("""
                         INSERT INTO transactions(
@@ -22,9 +25,10 @@ class RecordedTransactions:
                             amount,
                             status,
                             created_at,
-                            idempotency_key
+                            idempotency_key,
+                            note
                         )
-                        VALUES(?, ?, ?, ?, ?, ?, ?, ?)
+                        VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)
                         """,
                         (
                         self.transaction_id,
@@ -35,6 +39,7 @@ class RecordedTransactions:
                         status,
                         self.created_at,
                         self.idempotency_key,
+                        self.note
                         )
                         )
             return result.rowcount == 1

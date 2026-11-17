@@ -1,17 +1,11 @@
 from flask import Flask, request, jsonify
+from src.backend.services.Transactions.transfer.transfer import TransferService
+# from src.backend.services.Transactions.depositing.depositing import Deposit
+from src.backend.services.Transactions.transfer_info import TransferInfo
 app = Flask(__name__)
-from backend.services.transactions.transfer.transfer import TransferInfo, TransferService
 
 
 def view_transaction_history():
-    pass
-
-
-
-def deposits():
-    pass
-
-def withdrawals():
     pass
 
 
@@ -21,22 +15,26 @@ def transfers():
     data = request.get_json()
 
     user = TransferInfo(
-        from_account_id=data["from_account_id"],
-        to_account_id=data["to_account_id"],
+        debtor=data["debtor"],
+        creditor=data["creditor"],
+        transaction_type=data["transaction_type"],
         amount=data["amount"]
     )
 
-    service = TransferService(user)
-    result = service.transfer()
+    if user.transaction_type == 'transfer':
+        service = TransferService(user)
+        note = service.transfer()
+        report = service.print_report(note)
 
-    if result:
-        return jsonify({
-            "message": "Transfer completed successfully"
-        }), 200
+    if user.transaction_type == 'deposit':
+         service = Deposit(user)
+         result = service.transfer()
 
-    return jsonify({
-        "error": "Transfer failed"
-    }), 400
+    app.json.sort_keys = False
+    return jsonify(report), 200
+
+    
+
 
 
 

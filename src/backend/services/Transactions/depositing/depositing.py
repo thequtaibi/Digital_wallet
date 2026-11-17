@@ -1,8 +1,8 @@
 import uuid
 import time
 import sqlite3
-from services.Transactions.recorded_transactions import RecordedTransactions
-from services.Transactions.transfer_info import TransferInfo
+from src.backend.services.Transactions.recorded_transactions import RecordedTransactions
+from src.backend.services.Transactions.transfer_info import TransferInfo
 
 
 class Deposit:
@@ -57,26 +57,19 @@ class Deposit:
                 if self.transfer_process():
                     self.status = "completed"
                     recorded_transactions.recorded(self.status)
-                    return [{"Note":" successfully done"}]
+                    return {"message":" successfully done"}
                 else:
-                     return [{"Note":" Erorr"}]
+                     self.status = "failed"
+                     recorded_transactions.recorded(self.status)
+                     return {"message":" Erorr"}
             else:
                 self.status = "failed"
                 recorded_transactions.recorded(self.status)
-                return [{"Note":" You cant deposit 0"}]
+                return {"message":" You cant deposit 0"}
         else:
             self.status = "failed"
             recorded_transactions.recorded(self.status)
-            return [{"Note":" You don't have account"}]
+            return {"message":" You don't have account"}
 
 
 
-test_user = TransferInfo("atm-1", "01a1d3fb-e86b-7418-aea1-3980b428fedc", 1000, "deposit")
-test_depist = Deposit(test_user)
-ansere = test_depist.deposit()
-print(ansere)
-
-test_user = TransferInfo("atm-1", "01a1d3fb-e86b-7418-aea1-3980b428fedc", 1000, "deposit")
-test_depist = Deposit(test_user)
-ansere = test_depist.deposit()
-print(ansere)
