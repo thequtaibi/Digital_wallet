@@ -10,8 +10,8 @@ class TransationsReport:
             SELECT 
             u.account_number,
             CONCAT(first_name, ' ', last_name) AS name,
-            (SELECT CONCAT(first_name, ' ', last_name) FROM users WHERE user_id = t.to_account_id) AS "to_account_name",
-            (SELECT account_number FROM users WHERE user_id = t.to_account_id) AS "to_account_num",
+            (SELECT CONCAT(first_name, ' ', last_name) FROM users WHERE user_id = t.creditor) AS "to_account_name",
+            (SELECT account_number FROM users WHERE user_id = t.creditor) AS "to_account_num",
             t.amount,
             t.status,
             t.transaction_type,
@@ -19,7 +19,7 @@ class TransationsReport:
             t.note
             FROM users AS u
             LEFT JOIN transactions AS t
-            ON u.user_id = t.from_account_id
+            ON u.user_id = t.debtor
             WHERE u.user_id = ? 
             """
 

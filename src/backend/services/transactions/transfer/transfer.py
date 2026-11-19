@@ -15,7 +15,7 @@ class TransferService:
         self.amount = transactionInfo.amount
         self.status = None
         self.created_at = time.time()
-        self.idempotency_key = str(uuid.uuid7())
+        self.idempotency_key = transactionInfo.idempotency_key
 
 
 
@@ -105,12 +105,12 @@ class TransferService:
 
         if message is not None:
             self.status = "failed"
-            recorded_transactions.recorded(status=self.status, note=message)
+            recorded_transactions.record(status=self.status, note=message)
             return message
 
         if self.transfer_process():
             self.status = "completed"
-            recorded_transactions.recorded(status=self.status, note="Transfer completed successfully.")
+            recorded_transactions.record(status=self.status, note="Transfer completed successfully.")
             return f"{"Transfer completed successfully."}"
 
         self.status = "failed"

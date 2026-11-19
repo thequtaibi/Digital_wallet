@@ -1,8 +1,8 @@
 from flask import Flask, request, jsonify
-from src.backend.services.Transactions.transfer.transfer import TransferService
-# from src.backend.services.Transactions.depositing.depositing import Deposit
-from src.backend.services.Transactions.transfer_info import TransferInfo
-from src.backend.services.Transactions.transations_report import TransationsReport
+from src.backend.services.transactions.transfer.transfer import TransferService
+from src.backend.services.transactions.depositing.depositing import Deposit
+from src.backend.services.transactions.transactions_operations.transfer_info import TransferInfo
+from src.backend.services.transactions.transactions_operations.transations_report import TransationsReport
 app = Flask(__name__)
 
 
@@ -27,6 +27,7 @@ def transfers():
     data = request.get_json()
 
     user = TransferInfo(
+        idempotency_key=data["idempotency_key"],
         debtor=data["debtor"],
         creditor=data["creditor"],
         transaction_type=data["transaction_type"],
@@ -40,14 +41,10 @@ def transfers():
 
     if user.transaction_type == 'deposit':
          service = Deposit(user)
-         result = service.transfer()
+         report = service.deposit()
 
     app.json.sort_keys = False
     return jsonify(report), 200
-
-    
-
-
 
 
 
