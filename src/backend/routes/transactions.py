@@ -12,7 +12,7 @@ def transactions_report():
     data = request.get_json()
 
     transations_report = TransationsReport(user_id=data['user_id'])
-    transactions = transations_report._import_date_from_db()
+    transactions = transations_report.report()
 
     return jsonify({
         "status": "success",

@@ -1,5 +1,6 @@
 class TransferInfo:
-    def __init__(self, debtor, creditor, amount, transaction_type):
+    def __init__(self, idempotency_key, debtor, creditor, amount, transaction_type):
+        self.idempotency_key = idempotency_key
         self.debtor = debtor
         self.creditor = creditor
         if transaction_type in ['deposit', "transfer"]:

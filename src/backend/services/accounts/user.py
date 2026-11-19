@@ -29,6 +29,7 @@ class User:
 
 
 class UserService:
+    LIMIT = 10000
     DB_PATH = "src/backend/database/wallet.db"
     def __init__(self, user):
         self.user = user

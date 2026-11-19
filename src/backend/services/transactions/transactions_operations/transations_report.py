@@ -23,7 +23,7 @@ class TransationsReport:
             WHERE u.user_id = ? 
             """
 
-    def _import_date_from_db(self):
+    def report(self):
         with sqlite3.connect('/home/kind/Desktop/Digital_Wallet/src/backend/database/wallet.db') as conn:
             conn.row_factory = sqlite3.Row
             result = conn.execute(self.query, (self.user_id,))

@@ -1,8 +1,8 @@
 import uuid
 import time
 import sqlite3
-from src.backend.services.Transactions.recorded_transactions import RecordedTransactions
-from src.backend.services.Transactions.transfer_info import TransferInfo
+from src.backend.services.transactions.transactions_operations.recorded_transactions import RecordedTransactions
+from src.backend.services.transactions.transactions_operations.transfer_info import TransferInfo
 from datetime import datetime
 
 
