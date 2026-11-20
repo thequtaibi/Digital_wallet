@@ -24,7 +24,7 @@ class TransationsReport:
             """
 
     def report(self):
-        with sqlite3.connect('/home/kind/Desktop/Digital_Wallet/src/backend/database/wallet.db') as conn:
+        with sqlite3.connect('src/backend/database/wallet.db') as conn:
             conn.row_factory = sqlite3.Row
             result = conn.execute(self.query, (self.user_id,))
             transactions = [dict(row) for row in result.fetchall()]

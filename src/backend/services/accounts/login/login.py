@@ -11,7 +11,7 @@ class LoginVerification:
 
 
     def _search_db(self):
-        with sqlite3.connect("/home/kind/Desktop/Digital_Wallet/src/backend/database/wallet.db") as conn:
+        with sqlite3.connect("src/backend/database/wallet.db") as conn:
             result = conn.execute("""
                     SELECT 
                     username,

@@ -7,6 +7,7 @@ from datetime import datetime
 
 
 class TransferService:
+    DATABASE_PATH = "src/backend/database/wallet.db"
     def __init__(self, transactionInfo):
         self.transaction_id = str(uuid.uuid4().int)
         self.transaction_type = transactionInfo.transaction_type
@@ -20,7 +21,7 @@ class TransferService:
 
 
     def valid_users(self, account_id):
-        with sqlite3.connect("/home/kind/Desktop/Digital_Wallet/src/backend/database/wallet.db") as conn:
+        with sqlite3.connect(self.DATABASE_PATH) as conn:
             result = conn.execute(
                 "SELECT 1 FROM users WHERE user_id = ? LIMIT 1",
                 (account_id,)
@@ -36,7 +37,7 @@ class TransferService:
         if self.debtor == self.creditor:
             raise ValueError("Cannot transfer to the same account")
 
-        with sqlite3.connect("/home/kind/Desktop/Digital_Wallet/src/backend/database/wallet.db") as conn:
+        with sqlite3.connect(self.DATABASE_PATH) as conn:
 
             conn.execute("BEGIN IMMEDIATE")
 

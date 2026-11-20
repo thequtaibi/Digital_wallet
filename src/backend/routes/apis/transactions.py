@@ -1,13 +1,13 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, Blueprint
 from src.backend.services.transactions.transfer.transfer import TransferService
 from src.backend.services.transactions.depositing.depositing import Deposit
 from src.backend.services.transactions.transactions_operations.transfer_info import TransferInfo
 from src.backend.services.transactions.transactions_operations.transations_report import TransationsReport
-app = Flask(__name__)
+transactions_bp = Blueprint("transactions", __name__)
 
 
 
-@app.route("/transactions/report", methods=['POST'])
+@transactions_bp.route("/transactions/report", methods=['POST'])
 def transactions_report():
     data = request.get_json()
 
@@ -22,7 +22,7 @@ def transactions_report():
 
 
 
-@app.route("/transactions/transfers" ,methods=['POST'])
+@transactions_bp.route("/transactions/transfers" ,methods=['POST'])
 def transfers():
     data = request.get_json()
 
@@ -41,13 +41,15 @@ def transfers():
 
     if user.transaction_type == 'deposit':
          service = Deposit(user)
-         report = service.deposit()
+         note = service.deposit()
+         report = service.report(note)
+         
 
-    app.json.sort_keys = False
+    # transactions_bp.json.sort_keys = False
     return jsonify(report), 200
 
 
 
 if __name__ == "__main__":
-	app.run(debug=True)
+	transactions_bp.run(debug=True)
 

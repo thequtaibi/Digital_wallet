@@ -2,17 +2,33 @@ import uuid
 import time
 from argon2 import PasswordHasher
 import sqlite3
-from .user_validator import UserValidator
+from src.backend.services.accounts.users.vaildations.user_validator import AccountValidator
 
-"""TODO
-vailed email
-vailed phone number + add +966
-vailed password
-"""
+from enum import Enum
 
+from enum import Enum
 
-class User:
-    def __init__(self, gov_identification, first_name, last_name, email, phone_number, password, balance=0):
+class AccountType(Enum):
+    NORMAL = "normal"
+    SILVER = "silver"
+    GOLD = "gold"
+
+ACCOUNT_LIMITS = {
+    AccountType.NORMAL: 10_000,
+    AccountType.SILVER: 100_000,
+    AccountType.GOLD: 1_000_000,
+}
+
+def get_account_type(balance: float) -> AccountType:
+    if balance < 0:
+        raise ValueError("Balance cannot be negative")
+    for account_type, limit in ACCOUNT_LIMITS.items():
+        if balance <= limit:
+            return account_type
+    raise ValueError("Balance exceeds the maximum allowed (1,000,000)")
+
+class Account:
+    def __init__(self, gov_identification, first_name, last_name, email, phone_number, password, username,balance=0):
         self.user_id = str(uuid.uuid7())
         self.account_number = str(uuid.uuid4().int % 10**10).zfill(10)
         self.balance = balance
@@ -23,13 +39,14 @@ class User:
         self.last_name = last_name
         self.email = email
         self.phone_number = str(phone_number)
+        self.username = username
         self.password = PasswordHasher().hash(password)
         self.created_at = time.time()
+        self.account_type = get_account_type(self.balance)
 
 
 
-class UserService:
-    LIMIT = 10000
+class AccountService:
     DB_PATH = "src/backend/database/wallet.db"
     def __init__(self, user):
         self.user = user
@@ -51,10 +68,12 @@ class UserService:
                             last_name,
                             email,
                             phone_number,
+                            username,
                             password,
-                            created_at
+                            created_at,
+                            account_type
                         )
-                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                         """,
                         (
                             self.user.user_id,
@@ -67,8 +86,10 @@ class UserService:
                             self.user.last_name,
                             self.user.email,
                             self.user.phone_number,
+                            self.user.username,
                             self.user.password,
-                            self.user.created_at
+                            self.user.created_at,
+                            self.user.account_type.value
                         )
                             )
             return f"Done adding {self.user.gov_identification}"
@@ -95,10 +116,10 @@ class UserService:
         if self.check_for_existing_account():
             return "you have already account"
         
-        elif not UserValidator().validate_email(self.user.email):
+        elif not AccountValidator().validate_email(self.user.email):
             return "invild email" 
 
-        elif not UserValidator().validate_phone_number(self.user.phone_number):
+        elif not AccountValidator().validate_phone_number(self.user.phone_number):
             return 'invild phone'
         else:
             save_to_db = self.save_to_db()

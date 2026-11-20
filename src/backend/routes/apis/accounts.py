@@ -1,28 +1,30 @@
-from flask import Flask, request
-from backend.services.accounts.user import User, UserService
+from flask import Flask, request, Blueprint, jsonify
+from src.backend.services.accounts.users.user import Account, AccountService
 import json
 import sqlite3
-app = Flask(__name__)
+account_bp = Blueprint("accounts", __name__)
 
-# hi 
 
-@app.route("/accounts", methods=['POST'])
+
+
+@account_bp.route("/accounts", methods=['POST'])
 def add_acounts():
-	user = User(
+	user = Account(
 		gov_identification=request.json['gov_identification'],
         first_name=request.json['first_name'], 
         last_name=request.json['last_name'], 
         email=request.json['email'], 
         phone_number=request.json['phone_number'], 
+        username=request.json['username'],
         password=request.json['password']
         )
-	user_service = UserService(user)
-	response = user_service.add_account()
+	user_service = AccountService(user)
+	response = user_service.save_to_db()
 	return {"notes":f"{response}"}
 
 
 	
-@app.route("/accounts/<id_gev>")
+@account_bp.route("/accounts/<id_gev>")
 def account_informations(id_gev):
     with sqlite3.connect("src/backend/database/wallet.db") as conn:
         conn.row_factory = sqlite3.Row
@@ -45,4 +47,4 @@ def update_account():
       pass
 
 if __name__ == "__main__":
-	app.run(debug=True)
+	account_bp.run(debug=True)

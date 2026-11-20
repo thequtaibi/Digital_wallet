@@ -1,7 +1,7 @@
 from email_validator import validate_email as check_email, EmailNotValidError
-import sqlite3
 
-class UserValidator:
+
+class AccountValidator:
 
     @staticmethod
     def validate_email(email):

@@ -1,11 +1,11 @@
 
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, Blueprint
 from src.backend.services.accounts.login.login import LoginVerification
-app = Flask(__name__)
+login_bp = Blueprint("login", __name__)
 
 
 
-@app.route("/login", methods=['POST'])
+@login_bp.route("/login", methods=['POST'])
 def transactions_report():
     data = request.get_json()
 

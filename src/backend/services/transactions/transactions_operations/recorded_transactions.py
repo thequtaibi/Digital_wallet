@@ -1,7 +1,7 @@
 import sqlite3
 
 class RecordedTransactions:
-    DATAPATH = "/home/kind/Desktop/Digital_Wallet/src/backend/database/wallet.db"
+    DATAPATH = "src/backend/database/wallet.db"
     def __init__(self, transaction_id, transaction_type, debtor, creditor, amount,created_at, idempotency_key):
          self.transaction_id = transaction_id
          self.transaction_type = transaction_type

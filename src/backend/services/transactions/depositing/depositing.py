@@ -7,7 +7,7 @@ from datetime import datetime
 from src.backend.services.transactions.validations.valid_user import Validations
 
 class Deposit:
-    DATABASE_PATH = "/home/kind/Desktop/Digital_Wallet/src/backend/database/wallet.db"
+    DATABASE_PATH = "src/backend/database/wallet.db"
     def __init__(self, TransferInfo):
         self.transaction_id = str(uuid.uuid4().int)
         self.debtor = TransferInfo.debtor
@@ -38,7 +38,7 @@ class Deposit:
                 """,
                 (
                     self.amount,
-                    self.creditor,                )
+                    self.creditor,)
             )
         return result.rowcount == 1
 
@@ -90,7 +90,7 @@ class Deposit:
 
     def report(self, note):
         report = {
-            "report_name" : "Transfer Receipt",
+            "report_name" : "Deposit Receipt",
             "date" : datetime.fromtimestamp(self.created_at),
             "transaction_id" : self.transaction_id,
             "amount" : self.amount,
