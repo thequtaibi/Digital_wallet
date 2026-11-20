@@ -13,16 +13,19 @@ class AccountType(Enum):
     SILVER = "silver"
     GOLD = "gold"
 
-ACCOUNT_LIMITS = {
+class AccountLimits:
+    ACCOUNT_LIMITS = {
     AccountType.NORMAL: 10_000,
     AccountType.SILVER: 100_000,
     AccountType.GOLD: 1_000_000,
-}
+   }
+
+
 
 def get_account_type(balance: float) -> AccountType:
     if balance < 0:
         raise ValueError("Balance cannot be negative")
-    for account_type, limit in ACCOUNT_LIMITS.items():
+    for account_type, limit in AccountLimits.ACCOUNT_LIMITS.items():
         if balance <= limit:
             return account_type
     raise ValueError("Balance exceeds the maximum allowed (1,000,000)")

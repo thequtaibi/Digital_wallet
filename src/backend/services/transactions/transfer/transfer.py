@@ -4,6 +4,7 @@ import sqlite3
 from src.backend.services.transactions.transactions_operations.recorded_transactions import RecordedTransactions
 from src.backend.services.transactions.transactions_operations.transfer_info import TransferInfo
 from datetime import datetime
+from src.backend.services.transactions.validations.valid_user import Validations
 
 
 class TransferService:
@@ -19,15 +20,6 @@ class TransferService:
         self.idempotency_key = transactionInfo.idempotency_key
 
 
-
-    def valid_users(self, account_id):
-        with sqlite3.connect(self.DATABASE_PATH) as conn:
-            result = conn.execute(
-                "SELECT 1 FROM users WHERE user_id = ? LIMIT 1",
-                (account_id,)
-            )
-
-            return result.fetchone() is not None
 
     def transfer_process(self):
 
@@ -80,11 +72,15 @@ class TransferService:
         if self.debtor == self.creditor:
             return "Cannot transfer to the same account."
 
-        if not self.valid_users(self.debtor):
+        if not Validations.valid_users(self.debtor):
             return "Sender account not found."
 
-        if not self.valid_users(self.creditor):
-            return "Recipient account not found."
+        if not Validations.valid_users(self.creditor):
+                    return "Recipient account not found."
+
+        if not Validations.validate_account(self.debtor, self.amount):
+            return "Sender account has insufficient funds or is inactive."
+
 
         if self.amount < 1:
             return "Invalid transfer amount."
