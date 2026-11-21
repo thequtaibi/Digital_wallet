@@ -1,5 +1,5 @@
 import sqlite3
-from src.backend.services.accounts.users.user import AccountLimits
+from src.backend.services.accounts.users.user import AccountLimits, AccountType
 
 
 class Validations:
@@ -36,7 +36,12 @@ class Validations:
         if user is None:
             return False
 
-        limit = Validations.ACCOUNT_LIMITS.get(user["account_type"])
+        try:
+            account_type = AccountType(user["account_type"])
+        except ValueError: 
+            return False
+
+        limit = Validations.ACCOUNT_LIMITS.get(account_type)
         if limit is None:
             return False
 
@@ -47,7 +52,7 @@ class Validations:
                 SELECT COALESCE(SUM(amount), 0)
                 FROM transactions
                 WHERE debtor = ?
-                AND date(created_at) = date('now', 'localtime')
+                AND date(created_at, 'unixepoch', 'localtime') = date('now', 'localtime')
                 """,
                 (user_id,),
             ).fetchone()[0]
