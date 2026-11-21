@@ -1,20 +1,50 @@
-Missing Entrypoint & Dependency File: There is no top-level application entrypoint (e.g., main.py or app.py) wiring the routes together, nor a requirements.txt / pyproject.toml specifying dependencies.   
-Digital_wallet-master.zip
+# Digital Wallet
 
-Filename Typos: Several files have spelling errors that will make imports error-prone as the project grows: tabls.py (tables.py), transations_report.py (transactions_report.py), and transfer_vaildations.py (transfer_validations.py).   
+A small wallet backend I built to learn how money apps work. Python, Flask, SQLite.
+It's a learning project, so don't use it with real money.
 
+## What it does
 
-Tracked Build Artifacts (__pycache__): Multiple __pycache__ directories containing compiled .cpython-314.pyc files are committed across routes/ and services/. Several .pyc files in services/transactions/__pycache__/ and services/accounts/__pycache__/create_account.cpython-314.pyc are leftovers from modules that were later moved or deleted. Add __pycache__/ and *.py[cod] to a .gitignore file and remove them from Git tracking.   
+- Create accounts and log in (passwords hashed with Argon2)
+- Deposit and transfer money, with a daily limit per account type
+- Show a user's transaction history
 
+Transfers can't double-spend: the balance check and update are one SQL statement
+inside a locked transaction. Each payment needs an `idempotency_key`, so the same
+request can't go through twice.
 
-1. Reliable database transactions and rollback.
-2. Proper authentication and authorization.
-3. Idempotency and protection against duplicate requests.
-4. Consistent exception handling.
-5. Unit and integration testing.
-6. Clean separation of business logic, database access, and API layers.
-7. Understanding of concurrency and race conditions.
-to install all the dependnesses
+## Structure
 
+- `wallet/api/` handles requests
+- `wallet/services/` holds the rules
+- `wallet/repositories/` is the only code that talks to the database
 
+## Run it
+
+Needs Python 3.14+.
+
+```bash
+python3 -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
+mkdir -p database
+python -c "import sqlite3; sqlite3.connect('database/wallet.db').executescript(open('wallet/schema.sql').read())"
+python run.py
+```
+
+## Endpoints
+
+| Method | Path | Body |
+|---|---|---|
+| POST | `/accounts` | `gov_identification, first_name, last_name, email, phone_number, username, password` |
+| GET | `/accounts/<gov_identification>` | |
+| POST | `/login` | `username, password` |
+| POST | `/transactions/transfers` | `transaction_type` (`deposit` or `transfer`), `idempotency_key, debtor, creditor, amount` |
+| POST | `/transactions/report` | `user_id` |
+
+## Not done yet
+
+- No login token, so endpoints trust any `user_id` sent to them
+- `GET /accounts` returns the password hash
+- Some errors return 500 instead of a clear message
+- Money is stored as float, not cents
+- No tests or withdraw yet
